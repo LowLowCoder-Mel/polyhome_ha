@@ -10,3 +10,7 @@
     5b#cb:
       name: light5bcb
   platform: polynightlight
+- devices:
+    5b#cb:
+      name: light5bcb
+  platform: polynightlight
