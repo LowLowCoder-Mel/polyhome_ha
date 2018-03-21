@@ -40,7 +40,7 @@ POLY_ZIGBEE_SERVICE = 'send_d'
 EVENT_ZIGBEE_RECV = 'zigbee_data_event'
 
 # /dev/tty.usbserial
-UART_PATH = '/dev/tty.usbserial'
+UART_PATH = '/dev/ttyUSB0'
 
 CMD_EDIT_DONGLE = [0x80, 0x0, 0x0, 0x0, 0x19, 0x44, 0x0, 0x0, 0xf, 0x0, 0x0, \
                     0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, \
@@ -397,6 +397,60 @@ def setup(hass, config):
                 friendly_name = '三路单火灯'
                 mac = pack_list[6].replace('0x', '') + "#" + pack_list[7].replace('0x', '')
                 data = {'devices': {mac: {'name': 'light' + mac.replace('#', '')}}, 'platform': 'polylight3'}
+                pack = {'plugin_type': 'light', 'entity_id': 'light.light' + mac.replace('#', ''), 'plugin_info': data}
+                mgr = DevicePluginManager(hass, config)
+                name_mgr = FriendlyNameManager(hass, config)
+                if mgr.add_plugin(pack):
+                    discovery.load_platform(hass, 'light', data['platform'], {'name': data['devices'][mac]['name'], 'mac': mac})
+                name_mgr.edit_friendly_name(pack['entity_id'] + '1', friendly_name + '1')
+                name_mgr.edit_friendly_name(pack['entity_id'] + '2', friendly_name + '2')
+                name_mgr.edit_friendly_name(pack['entity_id'] + '3', friendly_name + '3')
+                data = {'entity_id': pack['entity_id'] + '1', 'friendly_name': friendly_name}
+                data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
+                notity_client_device_into_net(data_obj)
+                data = {'entity_id': pack['entity_id'] + '2', 'friendly_name': friendly_name}
+                data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
+                notity_client_device_into_net(data_obj)
+                data = {'entity_id': pack['entity_id'] + '3', 'friendly_name': friendly_name}
+                data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
+                notity_client_device_into_net(data_obj)
+            elif pack_list[5] == '0x24':
+                # 0xa0', '0xc6', '0x4', '0xa0', '0x4', '0x24', '0x4', '0xa0', '0x7a', '0x5b
+                friendly_name = '一路单火情景面板'
+                mac = pack_list[6].replace('0x', '') + "#" + pack_list[7].replace('0x', '')
+                data = {'devices': {mac: {'name': 'light' + mac.replace('#', '')}}, 'platform': 'polylightpanel'}
+                pack = {'plugin_type': 'light', 'entity_id': 'light.light' + mac.replace('#', ''), 'plugin_info': data}
+                mgr = DevicePluginManager(hass, config)
+                name_mgr = FriendlyNameManager(hass, config)
+                if mgr.add_plugin(pack):
+                    discovery.load_platform(hass, 'light', data['platform'], {'name': data['devices'][mac]['name'], 'mac': mac})
+                name_mgr.edit_friendly_name(pack['entity_id'], friendly_name)
+                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name}
+                data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
+                notity_client_device_into_net(data_obj)
+            elif pack_list[5] == '0x25':
+                # 0xa0', '0xc6', '0x4', '0xa0', '0x4', '0x25', '0x4', '0xa0', '0x7a', '0x5b
+                friendly_name = '二路单火情景面板'
+                mac = pack_list[6].replace('0x', '') + "#" + pack_list[7].replace('0x', '')
+                data = {'devices': {mac: {'name': 'light' + mac.replace('#', '')}}, 'platform': 'polylightpanel2'}
+                pack = {'plugin_type': 'light', 'entity_id': 'light.light' + mac.replace('#', ''), 'plugin_info': data}
+                mgr = DevicePluginManager(hass, config)
+                name_mgr = FriendlyNameManager(hass, config)
+                if mgr.add_plugin(pack):
+                    discovery.load_platform(hass, 'light', data['platform'], {'name': data['devices'][mac]['name'], 'mac': mac})
+                name_mgr.edit_friendly_name(pack['entity_id'] + '1', friendly_name + '1')
+                name_mgr.edit_friendly_name(pack['entity_id'] + '2', friendly_name + '2')
+                data = {'entity_id': pack['entity_id'] + '1', 'friendly_name': friendly_name}
+                data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
+                notity_client_device_into_net(data_obj)
+                data = {'entity_id': pack['entity_id'] + '2', 'friendly_name': friendly_name}
+                data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
+                notity_client_device_into_net(data_obj)
+            elif pack_list[5] == '0x26':
+                # 0xa0', '0xc6', '0x4', '0xa0', '0x4', '0x26', '0x4', '0xa0', '0x7a', '0x5b
+                friendly_name = '三路单火情景面板'
+                mac = pack_list[6].replace('0x', '') + "#" + pack_list[7].replace('0x', '')
+                data = {'devices': {mac: {'name': 'light' + mac.replace('#', '')}}, 'platform': 'polylightpanel3'}
                 pack = {'plugin_type': 'light', 'entity_id': 'light.light' + mac.replace('#', ''), 'plugin_info': data}
                 mgr = DevicePluginManager(hass, config)
                 name_mgr = FriendlyNameManager(hass, config)
