@@ -7,7 +7,7 @@ from homeassistant.components.binary_sensor import (
 import homeassistant.helpers.config_validation as cv
 from homeassistant.const import (STATE_ON, STATE_OFF, STATE_UNKNOWN)
 
-DOMAIN = 'door'
+DOMAIN = 'polyiosensor'
 EVENT_MQTT_RECV = 'poly_mqtt_json'
 POLY_ZIGBEE_DOMAIN = 'poly_zb_uart'
 POLY_ZIGBEE_SERVICE = 'send_d'
@@ -29,13 +29,13 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
     doors = []
     if discovery_info is not None:
         device = {'name': discovery_info['name'], 'mac': discovery_info['mac']}
-        doors.append(PolyPirSensor(hass, device, None))
+        doors.append(PolyIOSensor(hass, device, None))
     else:
         for mac, device_config in config['devices'].items():
             device = {
                 'name': device_config['name'],
                 'mac': mac}
-            doors.append(PolyPirSensor(hass, device, config))
+            doors.append(PolyIOSensor(hass, device, config))
 
     add_devices(doors, True)
 
@@ -73,7 +73,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
     hass.loop.call_later(60, handle_time_changed_event, '')
 
 
-class PolyPirSensor(BinarySensorDevice):
+class PolyIOSensor(BinarySensorDevice):
     """Representation of an Polyhome PolyDoor."""
 
     def __init__(self, hass, device, dev_conf):
@@ -121,7 +121,7 @@ class PolyPirSensor(BinarySensorDevice):
 
         Implemented by platform classes.
         """
-        return {'platform': 'polypirsensor'}
+        return {'platform': 'polyiosensor'}
 
     def set_available(self, available):
         self._available = available
