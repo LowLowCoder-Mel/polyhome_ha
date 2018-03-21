@@ -3,6 +3,7 @@ import json
 import voluptuous as vol
 import time
 
+# Import the device class from the component that you want to support
 from homeassistant.components.light import Light, PLATFORM_SCHEMA
 import homeassistant.helpers.config_validation as cv
 
