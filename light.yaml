@@ -1,16 +1,8 @@
 - devices:
-    5#3a:
-      name: dimlight53a
+    5b#cb:
+      name: light5bcb
+  platform: polynightlight
+- devices:
+    5#76:
+      name: dimlight576
   platform: polydimlight
-- devices:
-    fe#c5:
-      name: lightfec5
-  platform: polylight3
-- devices:
-    5b#cb:
-      name: light5bcb
-  platform: polynightlight
-- devices:
-    5b#cb:
-      name: light5bcb
-  platform: polynightlight

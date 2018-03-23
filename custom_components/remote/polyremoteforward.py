@@ -3,106 +3,208 @@ import json
 import voluptuous as vol
 import os
 import time
+import copy
 
 from homeassistant.util.yaml import load_yaml, dump
 from homeassistant.components.remote import RemoteDevice
-
+import time
 import polyhome.util.algorithm as checkcrc
+import polyhome.util.crc16 as crc16
+import asyncio
+import homeassistant.helpers.config_validation as cv
 
 _LOGGER = logging.getLogger(__name__)
+
 
 DOMAIN = 'remoteforward'
 POLY_ZIGBEE_DOMAIN = 'poly_zb_uart'
 POLY_ZIGBEE_SERVICE = 'send_d'
 ENENT_ZIGBEE_RECV = 'zigbee_data_event'
 
-# 0x80,0x0,0x51,0x7b,0xb,0x44,0x51,0x7b,0x63,0x2,0x13,0x7,0x17,0x1,0x32,0xff,0x61
-CMD_LOCK_OPEN  = [0x80, 0x00, 0x51, 0x7b, 0xb, 0x44, 0x51, 0x7b, 0x63, \
-                    0x2, 0x13, 0x7, 0x17, 0x1, 0x32, 0xff, 0x61]
-CMD_LOCK_CLOSE = [0x80, 0x00, 0x51, 0x7b, 0xb, 0x44, 0x51, 0x7b, 0x63, \
-                    0x2, 0x13, 0x7, 0x17, 0x2, 0x33, 0xff, 0x63]
+SERVICE_LEARN = 'remote_learn_command'
+SERVICE_SEND = 'remote_send_command'
 
+COMMAND_SCHEMA = vol.Schema({
+    vol.Required('name'): vol.All(cv.ensure_list, [cv.string])
+    })
+
+# 0x80,0x0,0x2b,0x65,0x10,0x44,0x2b,0x65,0x63,0x1,0x5,0x2,0x6,0x1,0x1,0x3,0x1,0x1,0x0,0x4e,0x95,0x6f
+CMD_REMOTE_STUDY_PRE  = [0x80, 0x0, 0x0, 0x0, 0x0, 0x44, 0x0, 0x0, 0x63]
+CMD_REMOTE_STUDY = [0x01, 0x05, 0x02, 0x6, 0x1, 0x1, 0x03, 0x1,0x0, 0x0]
+
+
+CMD_REMOTE_SEND_PRE  = [0x80, 0x0, 0x0, 0x0, 0x0,0x44, 0x0, 0x0, 0x63]
+CMD_REMOTE_SEND = [0x01, 0x05, 0x02, 0x6, 0x1, 0x1, 0x05, 0x2, 0x0, 0x0, 0xf, 0x1,0x0, 0x0]
 
 def setup_platform(hass, config, add_devices, discovery_info=None):
     """Set up the RemoteForward platform."""
-    locks = []
+
+    remote = []
     if discovery_info is not None:
         device = {'name': discovery_info['name'], 'mac': discovery_info['mac']}
-        locks.append(PolyReForward(hass, config, device, None))
+        remote.append(PolyReForward(hass, config, device, None))
     else:
         for mac, device_config in config['devices'].items():
             device = {'name': device_config['name'], 'mac': mac}
-            locks.append(PolyReForward(hass, config, device, device_config))
+            remote.append(PolyReForward(hass, config, device, device_config))
 
-    add_devices(locks, True)
+    add_devices(remote, True)
 
     open(hass.config.config_dir + '/remote_key.yaml' , 'r')
     
     def event_zigbee_msg_handle(event):
         """Listener to handle fired events"""
         pack_list = event.data.get('data')
+        key = event.data.get('key')
+
         """ A0包类: 1.主动上报 2.心跳 3.设备入网 4.getstatus 5.执行失败重发 6.广播情景设定 7.发现机制(针对平台)
         8.判断设备是否为有校
-        """        
-        # '0xa0', '0xc6', '0x51', '0x7b', '0xd', '0x55', '0x51', '0x7b', '0x74', '0x2', '0x13', '0x7', 
-        # '0x17', '0x5', '0x99', '0x89', '0x58', '0xff', '0xf9'
-        if pack_list[0] == '0xa0' and pack_list[8] == '0x70':
+        """   
+            # '0xa0', '0xd3', '0x2b', '0x65', '0x11', '0x2', '0x2b', '0x65', '0x70', '0x1', '0x0', '0x0', '0x0', '0x0', '0x0', 
+            # '0x0', '0x0', '0x0', '0x0', '0x0', '0x0', '0x0', '0x11'
+        if pack_list[0] == '0xa0' and pack_list[5] == '0x2' and pack_list[8] == '0x70':
             mac_l, mac_h = pack_list[2].replace('0x', ''), pack_list[3].replace('0x', '')
             mac_str = mac_l + '#' + mac_h
-            dev = next((dev for dev in locks if dev.mac == mac_str), None)
+            dev = next((dev for dev in remote if dev.mac == mac_str), None)
             if dev is None:
                 return
             dev.set_available(True)
-            if pack_list[9] == '0x2' and pack_list[-2] == '0xff':
-                key_mgr = RemoteKeyManager(hass, config)
-                key_mgr.edit_friendly_name(dev.mac, pack_list[10:13])     
-        if pack_list[0] == '0xa0' and pack_list[5] == '0x0' and pack_list[8] == '0xcc':
+        if pack_list[0] =='0xa0' and pack_list[-4] == '0x0':
+            # 学习成功:0xa0 0xbb 0x2b 0x65 0xc 0x55 0x2b 0x65 0x74 0xf 0x24 0xf 0x24 0x1 0x0 0x6c 0x32 0x69 
+            mac_l, mac_h = pack_list[2].replace('0x', ''), pack_list[3].replace('0x', '')
+            mac_str = mac_l + '#' + mac_h
+            dev = next((dev for dev in remote if dev.mac == mac_str), None)
+            if dev is None:
+                return
+            key_mgr = RemoteKeyManager(hass, config)
+            key_mgr.edit_friendly_name(dev.mac, pack_list[10:13]) 
+        if pack_list[0] =='0xa0' and pack_list[-4] == '0x5':
+            # 超时:0xa0 0xba 0x2b 0x65 0xc 0x55 0x2b 0x65 0x74 0xf 0x24 0xf 0x24 0x1 0x5 0x6f 0xf2 0xae
+            mac_l, mac_h = pack_list[2].replace('0x', ''), pack_list[3].replace('0x', '')
+            mac_str = mac_l + '#' + mac_h
+            dev = next((dev for dev in remote if dev.mac == mac_str), None)
+            if dev is None:
+                return
+        if pack_list[0] == '0xa0' and pack_list[5] == '0x2' and pack_list[8] == '0xcc':
             """heart_beat"""
             mac_l, mac_h = pack_list[2].replace('0x', ''), pack_list[3].replace('0x', '')
             mac_str = mac_l + '#' + mac_h
-            dev = next((dev for dev in locks if dev.mac == mac_str), None)
+            dev = next((dev for dev in remote if dev.mac == mac_str), None)
             if dev is None:
                 return
             dev.set_available(True)
             dev.heart_beat()
         if pack_list[0] == '0xc0':
+            #0xc0 0x0 0x2b 0x65 0x2 0xff 0x40 0x33 
             mac_l, mac_h = pack_list[2].replace('0x', ''), pack_list[3].replace('0x', '')
             mac_str = mac_l + '#' + mac_h
-            dev = next((dev for dev in locks if dev.mac == mac_str), None)
+            dev = next((dev for dev in remote if dev.mac == mac_str), None)
             if dev is None:
-                return
+                return    
             if pack_list[6] == '0x41':
                 dev.set_available(False)
             if pack_list[6] == '0x40':
                 dev.set_available(True)
-    
+            now = time.time()
+            hass.loop.call_later(12, handle_time_changed_event, '')
+            
     hass.bus.listen(ENENT_ZIGBEE_RECV, event_zigbee_msg_handle)
 
     # device online check
     def handle_time_changed_event(call):
         now = time.time()
-        for device in locks:
+        for device in remote:
             if round(now - device.heart_time_stamp) > 60 * 30:
                 device.set_available(False)
         hass.loop.call_later(60, handle_time_changed_event, '')
         
     hass.loop.call_later(60, handle_time_changed_event, '')
+   
+    def service_learn_handler(service):
+        key = service.data.get('key')
+        entity_id = service.data.get('entity_id')
+        mac = entity_id.replace('remote.polyremoteforward','')
+        dev = next((dev for dev in remote if dev.mac.replace('#','') == mac), None)
+        if dev is None:
+            return
+        study_command(key, dev.mac)
+
+    def service_send_handler(service):
+        key = service.data.get('key')
+        entity_id = service.data.get('entity_id')
+        mac = entity_id.replace('remote.polyremoteforward','')
+        dev = next((dev for dev in remote if dev.mac.replace('#','') == mac), None)
+        if dev is None:
+            return
+        send_command(key, dev.mac)
+    
+    hass.services.register('remote', SERVICE_LEARN, service_learn_handler)
+    hass.services.register('remote', SERVICE_SEND, service_send_handler)
+
+    def study_command(key, mac):
+        """Send a study command to a device."""
+        mac = mac.split('#')
+        result = study_command_data(key, mac)
+        _LOGGER.warn("-------study_command-------"+str(result))
+        hass.services.call(POLY_ZIGBEE_DOMAIN, POLY_ZIGBEE_SERVICE, {"data": result})
+   
+    def study_command_data(key, mac):
+        key_int = int(key)
+        CMD_STUDY = copy.deepcopy(CMD_REMOTE_STUDY)
+        CMD_REMOTE_STUDY[7] = 0x1
+        CMD_STUDY[8] = key_int % 256
+        CMD_STUDY[9] = key_int // 256
+        CMD_REMOTE_STUDY_PRE[2] = int('0x'+mac[0],16)
+        CMD_REMOTE_STUDY_PRE[3] = int('0x'+mac[1],16)
+        CMD_REMOTE_STUDY_PRE[4] = 4 + len(CMD_STUDY) + 2
+        CMD_REMOTE_STUDY_PRE[6] = int('0x'+mac[0],16)
+        CMD_REMOTE_STUDY_PRE[7] = int('0x'+mac[1],16)
+        
+        CMD_STUDY16 = crc16.createarray(CMD_STUDY)
+        result = CMD_REMOTE_STUDY_PRE + CMD_STUDY16 +[0xff]
+        return result
+
+
+    def send_command(key, mac):
+        """Send a command to a device."""
+        mac = mac.split('#')
+        result = send_command_data(key, mac)
+        _LOGGER.warn("-------send_command-------"+str(result))
+        hass.services.call(POLY_ZIGBEE_DOMAIN, POLY_ZIGBEE_SERVICE, {"data": result})
+   
+    def send_command_data(key, mac):
+        key_int = int(key)
+        CMD_SEND = copy.deepcopy(CMD_REMOTE_SEND)
+        CMD_REMOTE_SEND[7] = 0x2
+        CMD_SEND[8] = key_int % 256
+        CMD_SEND[9] = key_int // 256
+        CMD_SEND[12] = key_int % 256
+        CMD_SEND[13] = key_int // 256
+        CMD_REMOTE_SEND_PRE[2] = int('0x'+mac[0],16)
+        CMD_REMOTE_SEND_PRE[3] = int('0x'+mac[1],16)
+        CMD_REMOTE_SEND_PRE[4] = 4 + len(CMD_SEND) + 2
+        CMD_REMOTE_SEND_PRE[6] = int('0x'+mac[0],16)
+        CMD_REMOTE_SEND_PRE[7] = int('0x'+mac[1],16)
+        
+        CMD_SEND16 = crc16.createarray(CMD_SEND)
+        result = CMD_REMOTE_SEND_PRE + CMD_SEND16 +[0xff]
+        return result
+    
+    
 
 
 class PolyReForward(RemoteDevice):
     """Representation of an Polyhome ReForward Class."""
-
+   
     def __init__(self, hass, config, device, dev_conf):
         """Initialize an PolyReForward."""
         self._hass = hass
         self._config = config
         self._name = device['name']
         self._mac = device['mac']
-        self._config = dev_conf
         self._state = False
         self._available = True
         self._heart_timestamp = time.time()
-        self._last_command_sent = None
 
     @property
     def should_poll(self):
@@ -122,6 +224,16 @@ class PolyReForward(RemoteDevice):
     def is_on(self):
         """Return true if remote is on."""
         return self._state
+
+    def turn_on(self, **kwargs):
+        """Turn the device on."""
+        _LOGGER.error("Device does not support turn_on, " +
+                      "please use 'remote.send_command' to send commands.")
+
+    def turn_off(self, **kwargs):
+        """Turn the device off."""
+        _LOGGER.error("Device does not support turn_off, " +
+                      "please use 'remote.send_command' to send commands.")
     
     @property
     def heart_time_stamp(self):
@@ -130,74 +242,19 @@ class PolyReForward(RemoteDevice):
 
     @property
     def device_state_attributes(self):
-        """Return device state attributes."""
-        if self._last_command_sent is not None:
-            return {'last_command_sent': self._last_command_sent}
+        """Return device specific state attributes.
+
+        Implemented by platform classes.
+        """
+        return {'platform': 'polyremoteforward'}
 
     def set_available(self, state):
         self._available = state
-
-    def turn_on(self, **kwargs):
-        """Turn the remote on."""
-        self._state = True
-        self.schedule_update_ha_state()
-
-    def turn_off(self, **kwargs):
-        """Turn the remote off."""
-        self._state = False
-        self.schedule_update_ha_state()
-
-    def send_command(self, command, **kwargs):
-        """Send a command to a device."""
-        for com in command:
-            self._last_command_sent = com
-        self.schedule_update_ha_state()
-
-    # def lock(self, **kwargs):
-    #     """Lock the device."""
-    #     self._state = STATE_LOCKED
-    #     self.schedule_update_ha_state()
-    #     mac = self._mac.split('#')
-    #     CMD_LOCK_CLOSE[2], CMD_LOCK_CLOSE[3] = int(mac[0], 16), int(mac[1], 16)
-    #     CMD_LOCK_CLOSE[6], CMD_LOCK_CLOSE[7] = int(mac[0], 16), int(mac[1], 16)
-    #     key_mgr = RemoteKeyManager(self._hass, self._config)
-    #     lock_key = key_mgr.get_friendly_name(self._mac)
-    #     if lock_key is None:
-    #         return
-    #     CMD_LOCK_CLOSE[10] = int(lock_key[0].replace('0x', ''), 16)
-    #     CMD_LOCK_CLOSE[11] = int(lock_key[1].replace('0x', ''), 16)
-    #     CMD_LOCK_CLOSE[12] = int(lock_key[2].replace('0x', ''), 16)
-    #     CMD_LOCK_CLOSE[14] = self.sumup(CMD_LOCK_CLOSE[10:14])
-    #     self._hass.services.call(POLY_ZIGBEE_DOMAIN, POLY_ZIGBEE_SERVICE, {'data': CMD_LOCK_CLOSE})
-
-    # def unlock(self, **kwargs):
-    #     """Unlock the device."""
-    #     self._state = STATE_UNLOCKED
-    #     self.schedule_update_ha_state()
-    #     mac = self._mac.split('#')
-    #     CMD_LOCK_OPEN[2], CMD_LOCK_OPEN[3] = int(mac[0], 16), int(mac[1], 16)
-    #     CMD_LOCK_OPEN[6], CMD_LOCK_OPEN[7] = int(mac[0], 16), int(mac[1], 16)
-    #     key_mgr = RemoteKeyManager(self._hass, self._config)
-    #     lock_key = key_mgr.get_friendly_name(self._mac)  
-    #     if lock_key is None:
-    #         return
-    #     CMD_LOCK_OPEN[10] = int(lock_key[0].replace('0x', ''), 16)
-    #     CMD_LOCK_OPEN[11] = int(lock_key[1].replace('0x', ''), 16)
-    #     CMD_LOCK_OPEN[12] = int(lock_key[2].replace('0x', ''), 16)
-    #     CMD_LOCK_OPEN[14] = self.sumup(CMD_LOCK_OPEN[10:14])
-    #     self._hass.services.call(POLY_ZIGBEE_DOMAIN, POLY_ZIGBEE_SERVICE, {'data': CMD_LOCK_OPEN})
 
     def heart_beat(self):
         self._heart_timestamp = time.time()
         entity_id = 'remote.' + self.name
         self._hass.services.call('gateway', 'publish_heart_beat', {'entity_id': entity_id})
-
-    def sumup(self, data):
-        ret = 0
-        for byte in data:
-            ret += byte
-        ret = hex(ret)[-2:]
-        return int(ret, 16)
 
 
 class RemoteKeyManager(object):

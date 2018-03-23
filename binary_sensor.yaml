@@ -2,15 +2,3 @@
     11#a9:
       name: door11a9
   platform: polydoorsensor
-- devices:
-    4#a0:
-      name: panel44a0
-  platform: polypanel4
-- devices:
-    4#a0:
-      name: panel44a0
-  platform: polypanel4
-- devices:
-    11#a9:
-      name: door11a9
-  platform: polydoorsensor

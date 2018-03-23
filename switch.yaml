@@ -1,1 +1,4 @@
-[]
+- devices:
+    45#f5:
+      name: socket45f5
+  platform: polysocket
