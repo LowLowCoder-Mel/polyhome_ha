@@ -265,7 +265,6 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
 
     media_players = []
     if discovery_info is not None:
-        print(discovery_info)
         media_players.append(BackAudio(hass, discovery_info['ip'], 20090, discovery_info['devicename'], discovery_info['device_type'], discovery_info['device_id']))
 
     def event_tcp_backaudio_recv_handle(call):
@@ -291,7 +290,6 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
         if json_data['cmd'] == 'NotifyPlayingInfo' and json_data['direction'] == 'request':
             for player in media_players:
                 if player.device_id == json_data['sendId']:
-                    print('当前歌曲:'+ str(json_data))
                     player.set_media_title(json_data['arg']['media']['songName'])
                     player.set_media_artist(json_data['arg']['media']['singer'][0]['name'])
                     player.set_media_album_name(json_data['arg']['media']['albumName'])
@@ -300,13 +298,11 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
             for player in media_players:
                 if player.device_id == json_data['sendId']:
                     duration = json_data['arg']['duration']
-                    print('下一首duration:'+ str(duration))
                     player.set_media_duration(duration)
         if json_data['cmd'] == 'NotifyPlayTime' and json_data['direction'] == 'request':
             for player in media_players:
                 if player.device_id == json_data['sendId']:
                     playTime = json_data['arg']['playTime']
-                    print('playTime:'+ str(playTime))
                     player.set_playing_time(playTime)
                     
     hass.bus.listen('event_tcp_backaudio_recv', event_tcp_backaudio_recv_handle)
@@ -440,7 +436,6 @@ class BackAudio(MediaPlayerDevice):
     
     def set_media_artist(self, media_artist):
         self._media_artist = media_artist
-        print(self._media_artist)
         self.schedule_update_ha_state()
         
     @property
@@ -451,7 +446,6 @@ class BackAudio(MediaPlayerDevice):
     def set_media_album_name(self, media_album_name):
         """Return the album of current playing media (Music track only)."""
         self._media_album_name = media_album_name
-        print(self._media_album_name)
         return self._media_album_name
 
     @property
@@ -493,7 +487,6 @@ class BackAudio(MediaPlayerDevice):
             media_single.append(media['singer'][0]['name'])
             media_single.append(media['songMid'])
             self._tracks.append(tuple(media_single))
-        print(str(self._tracks))
         self.play_local_music()
 
     @property
@@ -511,7 +504,6 @@ class BackAudio(MediaPlayerDevice):
     def get_current_play_state(self):
         data = self._send_cmd(CMD_CURRENT_PLAY_STATE)
         data_l = str(data[4:], 'utf-8')
-        print('获取当前播放状态:' + str(data))
         data_d = json.loads(data_l)
         if data_d['arg']['playStat'] == 'resume':
             self.set_state(STATE_PLAYING)
@@ -524,7 +516,6 @@ class BackAudio(MediaPlayerDevice):
     def get_playing_info(self):
         data = self._send_cmd(CMD_GET_PLAYING_INFO)
         data_l = str(data[4:], 'utf-8')
-        print('获取当前歌曲:' + str(data))
         data_d = json.loads(data_l)
         if data_d['arg']['roomStat'] == 'inClosed':
             self.set_state(STATE_OFF)
@@ -543,11 +534,9 @@ class BackAudio(MediaPlayerDevice):
         if muted:
             CMD_MUTE_MUTE['arg']['muteStat'] = 'mute'
             self._send_cmd(CMD_MUTE_MUTE)
-            print('静音')
         else:
             CMD_MUTE_MUTE['arg']['muteStat'] = 'normal'
             self._send_cmd(CMD_MUTE_MUTE)
-            print('音量正常')
         self._volume_muted = muted
         self.schedule_update_ha_state()
 
@@ -558,7 +547,6 @@ class BackAudio(MediaPlayerDevice):
     def get_device_state(self):
         data = self._send_cmd(CMD_DEVICE_STATE)
         data_l = str(data[4:], 'utf-8')
-        print('获取设备开关机状态:' + str(data))
         data_d = json.loads(data_l)
         if data_d['sendId'] == self.device_id:
             if data_d['arg']['resultCode'] == 0:
@@ -597,7 +585,6 @@ class BackAudio(MediaPlayerDevice):
 
     def media_play(self):
         """Send play command."""
-        print('play')
         self._send_cmd(CMD_PLAY_RESUME)
         self._player_state = STATE_PLAYING
         self._progress = self.media_position
@@ -606,7 +593,6 @@ class BackAudio(MediaPlayerDevice):
     
     def media_pause(self):
         """Send pause command."""
-        print('paused')
         self._send_cmd(CMD_PLAY_PAUSE)
         self._player_state = STATE_PAUSED
         self._progress = self.media_position
@@ -614,7 +600,6 @@ class BackAudio(MediaPlayerDevice):
         self.schedule_update_ha_state()
     def media_previous_track(self):
         """previous song"""
-        print('media_previous_track')
         self._send_cmd(CMD_PLAY_PREV)
         self._progress = 0
         self._progress_updated_at = dt_util.utcnow()
@@ -622,7 +607,6 @@ class BackAudio(MediaPlayerDevice):
 
     def media_next_track(self):
         """next song"""
-        print('media_next_track')
         self._send_cmd(CMD_PLAY_NEXT)
         self._progress = 0
         self._progress_updated_at = dt_util.utcnow()
@@ -632,20 +616,16 @@ class BackAudio(MediaPlayerDevice):
         """Set the input source."""
         for key, value in SOURCES.items():
             if source == value:
-                if key == 0: # AUX 模块不支持 9 
-                    print('AUX')
+                if key == 0: # AUX 模块不支持 9
                     self._send_cmd(CMD_SWITCH_TO_AUX)
-                if key == 1: # FM  模块不支持 9 
-                    print('FM')
+                if key == 1: # FM  模块不支持 9
                     self._send_cmd(CMD_SWITCH_TO_FM)
                 if key == 2: # 本地
-                    print('LOCAL')
                     CMD_CHANGE_SOURCE['arg']['audioSource'] = 'localMusic'
                     self._send_cmd(CMD_CHANGE_SOURCE)
                     self._source = '本地'
                     self.schedule_update_ha_state()
                 if key == 3: # 云音乐
-                    print('云音乐')
                     CMD_CHANGE_SOURCE['arg']['audioSource'] = 'cloudMusic'
                     self._send_cmd(CMD_CHANGE_SOURCE)
                     self._source = '云音乐'
@@ -653,7 +633,6 @@ class BackAudio(MediaPlayerDevice):
 
     def play_local_music(self):
         """播放本地音乐"""
-        print('正在播放:' + self._tracks[0][1])
         CMD_PLAY_LOCAL_MUSIC['arg']['media']['songMid'] = self._tracks[0][3]
         CMD_PLAY_LOCAL_MUSIC['arg']['media']['songName'] = self._tracks[0][1]
         self._send_cmd(CMD_PLAY_LOCAL_MUSIC)

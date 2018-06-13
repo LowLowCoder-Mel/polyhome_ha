@@ -50,6 +50,7 @@ http:
 conversation:
 poly_config:
 poly_ota:
+polylocaludp:
 frontend:
 automation: !include automations.yaml
 group: !include groups.yaml

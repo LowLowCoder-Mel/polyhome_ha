@@ -43,6 +43,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
             dev = next((dev for dev in lights if dev.mac == mac_str), None)
             if dev is not None:
                 dev.set_available(True)
+                dev.heart_beat()
                 if pack_list[9] == '0x1':
                     dev.set_state(True)
                 elif pack_list[9] == '0x0':

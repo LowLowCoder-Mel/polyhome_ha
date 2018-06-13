@@ -38,15 +38,18 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
 
     def event_zigbee_recv_handler(event):
         """Listener to handle fired events"""
+        """0xa0 0xca 0x4b 0x67 0x6 0xf1 0x4b 0x67 0x93 0x1 0xff 0xf0"""
         pack_list = event.data.get('data')
-        if (pack_list[0] == '0xa0') and (pack_list[5] == '0xf1'):
+        if pack_list[0] == '0xa0' and pack_list[5] == '0xf1':
             mac_l, mac_h = pack_list[6].replace('0x', ''), pack_list[7].replace('0x', '')
             mac_str = mac_l + '#' + mac_h
             dev = next((dev for dev in lights if dev.mac == mac_str), None)
             if dev is not None:
+                dev.set_available(True)
+                dev.heart_beat()
                 if pack_list[9] == '0x1':
                     dev.set_state(True)
-                elif pack_list[9] == '0x0':
+                if pack_list[9] == '0x0':
                     dev.set_state(False)
         if pack_list[0] == '0xc0' and pack_list[6] == '0x41':
             mac_l, mac_h = pack_list[2].replace('0x', ''), pack_list[3].replace('0x', '')
