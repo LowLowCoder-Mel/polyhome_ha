@@ -470,7 +470,7 @@ async def async_setup(hass: HomeAssistantType, config: ConfigType) -> bool:
     def mqtt_pub_device_into_net_service(call):
         msg = call.data.get('data')
         pub_topic = '/v1/polyhome-ha/host/{}/dev_into_zigbee/'.format(uuid_str)
-        mqtt.async_publish(pub_topic, msg, 0, False)
+        hass.add_job(mqtt.async_publish, pub_topic, msg, 0, False)
 
     # 订阅监听主题
     dev_uuid = mac_util.get_uuid(hass.config.config_dir)
