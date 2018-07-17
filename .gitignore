@@ -2,7 +2,6 @@
 .idea
 .DS_Store
 deps
-
 custom_components/__pycache__
 custom_components/binary_sensor/__pycache__
 custom_components/cover/__pycache__
@@ -17,6 +16,7 @@ polyhome/__pycache__
 polyhome/util/__pycache__
 polyhome/helper/__pycache__
 pyzigbee/__pycache__
+
 
 automations.yaml
 customize.yaml
