@@ -101,7 +101,13 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
                         dev.set_state(True)
                     if dev.way == 2 and pack_list[10] == '0x0':
                         dev.set_state(False)
-                        
+        if pack_list[0] == '0xc0' and pack_list[6] == '0x41':
+            mac_l, mac_h = pack_list[2].replace('0x', ''), pack_list[3].replace('0x', '')
+            mac_str = mac_l + '#' + mac_h
+            for dev in lights:
+                if mac_str in dev.mac:
+                        dev.set_available(False)
+                                                
     # Listen for when zigbee_data_event is fired
     hass.bus.listen(EVENT_ZIGBEE_RECV, event_zigbee_recv_handler)
 
