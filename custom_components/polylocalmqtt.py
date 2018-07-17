@@ -432,7 +432,6 @@ async def async_setup(hass: HomeAssistantType, config: ConfigType) -> bool:
         hass.services.call('gateway', 'host_update', '')
 
     def mqtt_pub_state_change_service(call):
-        print('Local Mqtt State Change')
         msg = call.data.get('data')
         pub_topic = '/v1/polyhome-ha/host/{}/state_change/'.format(uuid_str)
         hass.async_add_job(hass.data[DATA_MQTT].async_publish, pub_topic, msg, 0, False)
