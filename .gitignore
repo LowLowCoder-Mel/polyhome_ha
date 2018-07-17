@@ -1,6 +1,11 @@
 .vscode
 .idea
 .DS_Store
+
+.HA_VERSION
+.reset
+.uuid
+
 deps
 
 custom_components/__pycache__
@@ -13,6 +18,7 @@ custom_components/sensor/__pycache__
 custom_components/switch/__pycache__
 custom_components/remote/__pycache__
 custom_components/camera/__pycache__
+
 polyhome/__pycache__
 polyhome/util/__pycache__
 polyhome/helper/__pycache__
@@ -34,9 +40,4 @@ home-assistant_v2.db
 panels.yaml
 frontend.yaml
 known_devices.yaml
-
-
-.HA_VERSION
-.reset
-.uuid
 

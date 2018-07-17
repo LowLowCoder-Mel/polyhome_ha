@@ -1,8 +1,2 @@
-- devices:
-    10#10:
-      name: backaudiomgr
-  platform: backaudiomgr
-# - devices:
-#       name: mde
-#   platform: demo
+
   

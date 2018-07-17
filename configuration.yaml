@@ -40,7 +40,7 @@ polylocalmqtt:
   client_id: fe:00:b1:08:d3:99
 polyremotemqtt:
   # broker server
-  broker: 60.205.151.71
+  broker: 123.57.139.200
   # broker port
   port: 1883
   # username
