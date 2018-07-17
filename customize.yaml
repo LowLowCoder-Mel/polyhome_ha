@@ -104,3 +104,5 @@ light.lnlight17252:
   friendly_name: 三路零火灯2
 light.lnlight17253:
   friendly_name: 三路零火灯3
+binary_sensor.panel44a0:
+  friendly_name: 4键情景面板

@@ -2,3 +2,7 @@
     11#5:
       name: door115
   platform: polydoorsensor
+- devices:
+    4#a0:
+      name: panel44a0
+  platform: polypanel4

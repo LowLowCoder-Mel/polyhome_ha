@@ -135,7 +135,7 @@ class PolyPanel(Entity):
                     json_msg['attributes']['button'] = key_id
                     pub_obj = {'status':'OK', 'data': json_msg, 'type': 'state_change'}
                     data_str = {'data': json.dumps(pub_obj)}
-                    self._hass.services.call('poly_mqtt', 'mqtt_pub_state_change', data_str)
+                    self._hass.services.call('polyremotemqtt', 'pub_data', data_str)
 
     def heart_beat(self):
         self._heart_timestamp = time.time()

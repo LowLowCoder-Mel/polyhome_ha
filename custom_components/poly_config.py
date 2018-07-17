@@ -1098,7 +1098,7 @@ def setup(hass, config):
     hass.bus.listen('state_changed', event_state_change_handler)
     hass.bus.listen('homeassistant_start', event_ha_start_handler)
     hass.bus.listen('homeassistant_stop', event_ha_stop_handler)
-    
+
 
     # setup zigbee dongle component /dev/tty.usbserial
     zigbee_conf = {'poly_zigbee': {'baudbrate': 57600, 'uartpath': UART_PATH}}
