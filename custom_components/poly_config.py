@@ -330,12 +330,14 @@ def setup(hass, config):
                 if mgr.add_plugin(pack):
                     discovery.load_platform(hass, component, data['platform'], {'name': data['devices'][mac]['name'], 'mac': mac})
                 name_mgr.edit_friendly_name(pack['entity_id'], friendly_name)
-                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name}
-                data_obj = {'status':'OK', 'data': data, 'type': 'add_device', 'device_type': platform}
+                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name, 'device_type': platform}
+                data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
                 notity_client_device_into_net(data_obj)
             elif pack_list[5] == '0x31':
                 # 0xa0', '0xc6', '0x4', '0xa0', '0x4', '0x31', '0x4', '0xa0', '0x7a', '0x5b
                 friendly_name = '二路零火灯'
+                component = 'light'
+                platform = 'polylnlight2'
                 mac = pack_list[6].replace('0x', '') + "#" + pack_list[7].replace('0x', '')
                 data = {'devices': {mac: {'name': 'lnlight' + mac.replace('#', '')}}, 'platform': 'polylnlight2'}
                 pack = {'plugin_type': 'light', 'entity_id': 'light.lnlight' + mac.replace('#', ''), 'plugin_info': data}
@@ -345,15 +347,17 @@ def setup(hass, config):
                     discovery.load_platform(hass, 'light', data['platform'], {'name': data['devices'][mac]['name'], 'mac': mac})
                 name_mgr.edit_friendly_name(pack['entity_id'] + '1', friendly_name + '1')
                 name_mgr.edit_friendly_name(pack['entity_id'] + '2', friendly_name + '2')
-                data = {'entity_id': pack['entity_id'] + '1', 'friendly_name': friendly_name}
+                data = {'entity_id': pack['entity_id'] + '1', 'friendly_name': friendly_name, 'device_type': platform}
                 data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
                 notity_client_device_into_net(data_obj)
-                data = {'entity_id': pack['entity_id'] + '2', 'friendly_name': friendly_name}
+                data = {'entity_id': pack['entity_id'] + '2', 'friendly_name': friendly_name, 'device_type': platform}
                 data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
                 notity_client_device_into_net(data_obj)
             elif pack_list[5] == '0x32':
                 # 0xa0', '0xc6', '0x4', '0xa0', '0x4', '0x32', '0x4', '0xa0', '0x7a', '0x5b
                 friendly_name = '三路零火灯'
+                component = 'light'
+                platform = 'polylnlight3'
                 mac = pack_list[6].replace('0x', '') + "#" + pack_list[7].replace('0x', '')
                 data = {'devices': {mac: {'name': 'lnlight' + mac.replace('#', '')}}, 'platform': 'polylnlight3'}
                 pack = {'plugin_type': 'light', 'entity_id': 'light.lnlight' + mac.replace('#', ''), 'plugin_info': data}
@@ -364,18 +368,20 @@ def setup(hass, config):
                 name_mgr.edit_friendly_name(pack['entity_id'] + '1', friendly_name + '1')
                 name_mgr.edit_friendly_name(pack['entity_id'] + '2', friendly_name + '2')
                 name_mgr.edit_friendly_name(pack['entity_id'] + '3', friendly_name + '3')
-                data = {'entity_id': pack['entity_id'] + '1', 'friendly_name': friendly_name}
+                data = {'entity_id': pack['entity_id'] + '1', 'friendly_name': friendly_name, 'device_type': platform}
                 data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
                 notity_client_device_into_net(data_obj)
-                data = {'entity_id': pack['entity_id'] + '2', 'friendly_name': friendly_name}
+                data = {'entity_id': pack['entity_id'] + '2', 'friendly_name': friendly_name, 'device_type': platform}
                 data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
                 notity_client_device_into_net(data_obj)
-                data = {'entity_id': pack['entity_id'] + '3', 'friendly_name': friendly_name}
+                data = {'entity_id': pack['entity_id'] + '3', 'friendly_name': friendly_name, 'device_type': platform}
                 data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
                 notity_client_device_into_net(data_obj)
             elif pack_list[5] == '0x20':
                 # 0xa0', '0xc6', '0x4', '0xa0', '0x4', '0x43', '0x4', '0xa0', '0x7a', '0x5b
                 friendly_name = '一路单火灯'
+                component = 'light'
+                platform = 'polylight'
                 mac = pack_list[6].replace('0x', '') + "#" + pack_list[7].replace('0x', '')
                 data = {'devices': {mac: {'name': 'light' + mac.replace('#', '')}}, 'platform': 'polylight'}
                 pack = {'plugin_type': 'light', 'entity_id': 'light.light' + mac.replace('#', ''), 'plugin_info': data}
@@ -384,12 +390,14 @@ def setup(hass, config):
                 if mgr.add_plugin(pack):
                     discovery.load_platform(hass, 'light', data['platform'], {'name': data['devices'][mac]['name'], 'mac': mac})
                 name_mgr.edit_friendly_name(pack['entity_id'], friendly_name)
-                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name}
+                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name, 'device_type': platform}
                 data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
                 notity_client_device_into_net(data_obj)
             elif pack_list[5] == '0x21':
                 # 0xa0', '0xc6', '0x4', '0xa0', '0x4', '0x43', '0x4', '0xa0', '0x7a', '0x5b
                 friendly_name = '二路单火灯'
+                component = 'light'
+                platform = 'polylight2'
                 mac = pack_list[6].replace('0x', '') + "#" + pack_list[7].replace('0x', '')
                 data = {'devices': {mac: {'name': 'light' + mac.replace('#', '')}}, 'platform': 'polylight2'}
                 pack = {'plugin_type': 'light', 'entity_id': 'light.light' + mac.replace('#', ''), 'plugin_info': data}
@@ -399,17 +407,19 @@ def setup(hass, config):
                     discovery.load_platform(hass, 'light', data['platform'], {'name': data['devices'][mac]['name'], 'mac': mac})
                 name_mgr.edit_friendly_name(pack['entity_id'] + '1', friendly_name + '1')
                 name_mgr.edit_friendly_name(pack['entity_id'] + '2', friendly_name + '2')
-                data = {'entity_id': pack['entity_id'] + '1', 'friendly_name': friendly_name}
+                data = {'entity_id': pack['entity_id'] + '1', 'friendly_name': friendly_name, 'device_type': platform}
                 data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
                 notity_client_device_into_net(data_obj)
-                data = {'entity_id': pack['entity_id'] + '2', 'friendly_name': friendly_name}
+                data = {'entity_id': pack['entity_id'] + '2', 'friendly_name': friendly_name, 'device_type': platform}
                 data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
                 notity_client_device_into_net(data_obj)
             elif pack_list[5] == '0x22':
                 # 0xa0', '0xc6', '0x4', '0xa0', '0x4', '0x43', '0x4', '0xa0', '0x7a', '0x5b
                 friendly_name = '三路单火灯'
+                component = 'light'
+                platform = 'polylight3'
                 mac = pack_list[6].replace('0x', '') + "#" + pack_list[7].replace('0x', '')
-                data = {'devices': {mac: {'name': 'light' + mac.replace('#', '')}}, 'platform': 'polylight3'}
+                data = {'devices': {mac: {'name': 'light' + mac.replace('#', '')}}, 'platform': platform}
                 pack = {'plugin_type': 'light', 'entity_id': 'light.light' + mac.replace('#', ''), 'plugin_info': data}
                 mgr = DevicePluginManager(hass, config)
                 name_mgr = FriendlyNameManager(hass, config)
@@ -419,13 +429,13 @@ def setup(hass, config):
                 name_mgr.edit_friendly_name(pack['entity_id'] + '2', friendly_name + '2')
                 name_mgr.edit_friendly_name(pack['entity_id'] + '3', friendly_name + '3')
                 data = {'entity_id': pack['entity_id'] + '1', 'friendly_name': friendly_name}
-                data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
+                data_obj = {'status':'OK', 'data': data, 'type': 'add_device', 'device_type': platform}
                 notity_client_device_into_net(data_obj)
                 data = {'entity_id': pack['entity_id'] + '2', 'friendly_name': friendly_name}
-                data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
+                data_obj = {'status':'OK', 'data': data, 'type': 'add_device', 'device_type': platform}
                 notity_client_device_into_net(data_obj)
                 data = {'entity_id': pack['entity_id'] + '3', 'friendly_name': friendly_name}
-                data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
+                data_obj = {'status':'OK', 'data': data, 'type': 'add_device', 'device_type': platform}
                 notity_client_device_into_net(data_obj)
             elif pack_list[5] == '0x43':
                 # 0xa0', '0xc6', '0x4', '0xa0', '0x4', '0x43', '0x4', '0xa0', '0x7a', '0x5b
@@ -465,14 +475,14 @@ def setup(hass, config):
                 component = 'binary_sensor'
                 platform = 'polyiosensor'
                 mac = pack_list[6].replace('0x', '') + "#" + pack_list[7].replace('0x', '')
-                data = {'devices': {mac: {'name': 'io' + mac.replace('#', '')}}, 'platform': platform}
+                data = {'devices': {mac: {'name': 'pir' + mac.replace('#', '')}}, 'platform': platform}
                 pack = {'plugin_type': component, 'entity_id': 'binary_sensor.io' + mac.replace('#', ''), 'plugin_info': data}
                 mgr = DevicePluginManager(hass, config)
                 name_mgr = FriendlyNameManager(hass, config)
                 if mgr.add_plugin(pack):
                     discovery.load_platform(hass, component, data['platform'], {'name': data['devices'][mac]['name'], 'mac': mac})
                 name_mgr.edit_friendly_name(pack['entity_id'], friendly_name)
-                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name, 'platform': platform}
+                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name, 'device_type': platform}
                 data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
                 notity_client_device_into_net(data_obj)
             elif pack_list[5] == '0x63':
@@ -489,10 +499,10 @@ def setup(hass, config):
                 name_mgr = FriendlyNameManager(hass, config)
                 name_mgr.edit_friendly_name(pack['entity_id'] + '1', friendly_name + '1')
                 name_mgr.edit_friendly_name(pack['entity_id'] + '2', friendly_name + '2')
-                data = {'entity_id': pack['entity_id'] + '1', 'friendly_name': friendly_name}
+                data = {'entity_id': pack['entity_id'] + '1', 'friendly_name': friendly_name, 'device_type': platform}
                 data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
                 notity_client_device_into_net(data_obj)
-                data = {'entity_id': pack['entity_id'] + '2', 'friendly_name': friendly_name}
+                data = {'entity_id': pack['entity_id'] + '2', 'friendly_name': friendly_name, 'device_type': platform}
                 data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
                 notity_client_device_into_net(data_obj)
             elif pack_list[5] == '0xb0':
@@ -508,7 +518,7 @@ def setup(hass, config):
                     discovery.load_platform(hass, component, data['platform'], {'name': data['devices'][mac]['name'], 'mac': mac})
                 name_mgr = FriendlyNameManager(hass, config)
                 name_mgr.edit_friendly_name(pack['entity_id'], friendly_name)
-                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name}
+                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name, 'device_type': platform}
                 data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
                 notity_client_device_into_net(data_obj)  
             elif pack_list[5] == '0x10':
@@ -524,7 +534,7 @@ def setup(hass, config):
                     discovery.load_platform(hass, component, data['platform'], {'name': data['devices'][mac]['name'], 'mac': mac})
                 name_mgr = FriendlyNameManager(hass, config)
                 name_mgr.edit_friendly_name(pack['entity_id'], friendly_name)
-                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name}
+                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name, 'device_type': platform}
                 data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
                 notity_client_device_into_net(data_obj)  
             elif pack_list[5] == '0x1e':
@@ -540,7 +550,7 @@ def setup(hass, config):
                     discovery.load_platform(hass, component, data['platform'], {'name': data['devices'][mac]['name'], 'mac': mac})
                 name_mgr = FriendlyNameManager(hass, config)
                 name_mgr.edit_friendly_name(pack['entity_id'], friendly_name)
-                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name}
+                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name, 'device_type': platform}
                 data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
                 notity_client_device_into_net(data_obj)
             elif pack_list[5] == '0x5':
@@ -556,7 +566,7 @@ def setup(hass, config):
                     discovery.load_platform(hass, component, data['platform'], {'name': data['devices'][mac]['name'], 'mac': mac})
                 name_mgr = FriendlyNameManager(hass, config)
                 name_mgr.edit_friendly_name(pack['entity_id'], friendly_name)
-                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name}
+                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name, 'device_type': platform}
                 data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
                 notity_client_device_into_net(data_obj) 
             elif pack_list[5] == '0x14':
@@ -573,7 +583,7 @@ def setup(hass, config):
                 name_mgr = FriendlyNameManager(hass, config)
                 name_mgr.edit_friendly_name(pack['entity_id'], friendly_name)
                 data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name}
-                data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
+                data_obj = {'status':'OK', 'data': data, 'type': 'add_device', 'device_type': platform}
                 notity_client_device_into_net(data_obj) 
             elif pack_list[5] == '0x12':
                 # '0xa0', '0xcd', '0x13', '0xa9', '0x4', '0x12', '0x13', '0xa9', '0x7a', '0x1'
@@ -589,7 +599,7 @@ def setup(hass, config):
                 name_mgr = FriendlyNameManager(hass, config)
                 name_mgr.edit_friendly_name(pack['entity_id'], friendly_name)
                 data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name}
-                data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
+                data_obj = {'status':'OK', 'data': data, 'type': 'add_device', 'device_type': platform}
                 notity_client_device_into_net(data_obj)                 
             elif pack_list[5] == '0xf3':
                 # '0xa0', '0xcd', '0x13', '0xa9', '0x4', '0x12', '0x13', '0xa9', '0x7a', '0x1'
@@ -605,7 +615,7 @@ def setup(hass, config):
                 name_mgr = FriendlyNameManager(hass, config)
                 name_mgr.edit_friendly_name(pack['entity_id'], friendly_name)
                 data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name}
-                data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
+                data_obj = {'status':'OK', 'data': data, 'type': 'add_device', 'device_type': platform}
                 notity_client_device_into_net(data_obj) 
             elif pack_list[5] == '0xf0':
                 # '0xa0', '0xcd', '0x13', '0xa9', '0x4', '0x12', '0x13', '0xa9', '0x7a', '0x1'
@@ -620,7 +630,7 @@ def setup(hass, config):
                     discovery.load_platform(hass, component, data['platform'], {'name': data['devices'][mac]['name'], 'mac': mac})
                 name_mgr = FriendlyNameManager(hass, config)
                 name_mgr.edit_friendly_name(pack['entity_id'], friendly_name)
-                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name}
+                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name, 'device_type': platform}
                 data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
                 notity_client_device_into_net(data_obj) 
             elif pack_list[5] == '0xf1':
@@ -636,7 +646,7 @@ def setup(hass, config):
                     discovery.load_platform(hass, component, data['platform'], {'name': data['devices'][mac]['name'], 'mac': mac})
                 name_mgr = FriendlyNameManager(hass, config)
                 name_mgr.edit_friendly_name(pack['entity_id'], friendly_name)
-                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name}
+                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name, 'device_type': platform}
                 data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
                 notity_client_device_into_net(data_obj)
             elif pack_list[5] == '0x53':
@@ -654,7 +664,13 @@ def setup(hass, config):
                 name_mgr.edit_friendly_name(pack['entity_id'] + '1', '温度')
                 name_mgr.edit_friendly_name(pack['entity_id'] + '2', '湿度')
                 name_mgr.edit_friendly_name(pack['entity_id'] + '3', '亮度')
-                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name}
+                data = {'entity_id': pack['entity_id'] + '1', 'friendly_name': friendly_name, 'device_type': platform}
+                data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
+                notity_client_device_into_net(data_obj)
+                data = {'entity_id': pack['entity_id'] + '2', 'friendly_name': friendly_name, 'device_type': platform}
+                data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
+                notity_client_device_into_net(data_obj)
+                data = {'entity_id': pack['entity_id'] + '3', 'friendly_name': friendly_name, 'device_type': platform}
                 data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
                 notity_client_device_into_net(data_obj)
             elif pack_list[5] == '0x3':
@@ -670,7 +686,7 @@ def setup(hass, config):
                     discovery.load_platform(hass, component, data['platform'], {'name': data['devices'][mac]['name'], 'mac': mac})
                 name_mgr = FriendlyNameManager(hass, config)
                 name_mgr.edit_friendly_name(pack['entity_id'], '电话拨号器')
-                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name}
+                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name, 'device_type': platform}
                 data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
                 notity_client_device_into_net(data_obj)
             elif pack_list[5] == '0x1':
@@ -687,7 +703,7 @@ def setup(hass, config):
                 name_mgr = FriendlyNameManager(hass, config)
                 name_mgr.edit_friendly_name(pack['entity_id'] + '1', friendly_name + '1')
                 name_mgr.edit_friendly_name(pack['entity_id'] + '2', friendly_name + '2')
-                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name}
+                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name, 'device_type': platform}
                 data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
                 notity_client_device_into_net(data_obj)
             elif pack_list[5] == '0x3c':
@@ -703,7 +719,7 @@ def setup(hass, config):
                     discovery.load_platform(hass, component, data['platform'], {'name': data['devices'][mac]['name'], 'mac': mac})
                 name_mgr = FriendlyNameManager(hass, config)
                 name_mgr.edit_friendly_name(pack['entity_id'], friendly_name)
-                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name}
+                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name, 'device_type': platform}
                 data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
                 notity_client_device_into_net(data_obj)
             elif pack_list[5] == '0x3d':
@@ -720,7 +736,7 @@ def setup(hass, config):
                 name_mgr = FriendlyNameManager(hass, config)
                 name_mgr.edit_friendly_name(pack['entity_id'] + '1', friendly_name + '1')
                 name_mgr.edit_friendly_name(pack['entity_id'] + '2', friendly_name + '2')
-                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name}
+                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name, 'device_type': platform}
                 data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
                 notity_client_device_into_net(data_obj)
             elif pack_list[5] == '0x3e':
@@ -738,7 +754,7 @@ def setup(hass, config):
                 name_mgr.edit_friendly_name(pack['entity_id'] + '1', friendly_name + '1')
                 name_mgr.edit_friendly_name(pack['entity_id'] + '2', friendly_name + '2')
                 name_mgr.edit_friendly_name(pack['entity_id'] + '3', friendly_name + '3')
-                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name}
+                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name, 'device_type': platform}
                 data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
                 notity_client_device_into_net(data_obj)
             elif pack_list[5] == '0x24':
@@ -754,7 +770,7 @@ def setup(hass, config):
                     discovery.load_platform(hass, component, data['platform'], {'name': data['devices'][mac]['name'], 'mac': mac})
                 name_mgr = FriendlyNameManager(hass, config)
                 name_mgr.edit_friendly_name(pack['entity_id'], friendly_name)
-                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name}
+                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name, 'device_type': platform}
                 data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
                 notity_client_device_into_net(data_obj)
             elif pack_list[5] == '0x25':
@@ -771,7 +787,7 @@ def setup(hass, config):
                 name_mgr = FriendlyNameManager(hass, config)
                 name_mgr.edit_friendly_name(pack['entity_id'] + '1', friendly_name + '1')
                 name_mgr.edit_friendly_name(pack['entity_id'] + '2', friendly_name + '2')
-                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name}
+                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name, 'device_type': platform}
                 data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
                 notity_client_device_into_net(data_obj)
             elif pack_list[5] == '0x26':
@@ -789,7 +805,7 @@ def setup(hass, config):
                 name_mgr.edit_friendly_name(pack['entity_id'] + '1', friendly_name + '1')
                 name_mgr.edit_friendly_name(pack['entity_id'] + '2', friendly_name + '2')
                 name_mgr.edit_friendly_name(pack['entity_id'] + '3', friendly_name + '3')
-                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name}
+                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name, 'device_type': platform}
                 data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
                 notity_client_device_into_net(data_obj)
             elif pack_list[5] == '0x60':
@@ -805,7 +821,7 @@ def setup(hass, config):
                     discovery.load_platform(hass, component, data['platform'], {'name': data['devices'][mac]['name'], 'mac': mac})
                 name_mgr = FriendlyNameManager(hass, config)
                 name_mgr.edit_friendly_name(pack['entity_id'], friendly_name)
-                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name}
+                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name, 'device_type': platform}
                 data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
                 notity_client_device_into_net(data_obj)
             elif pack_list[5] == '0x40':
@@ -821,7 +837,7 @@ def setup(hass, config):
                     discovery.load_platform(hass, component, data['platform'], {'name': data['devices'][mac]['name'], 'mac': mac})
                 name_mgr = FriendlyNameManager(hass, config)
                 name_mgr.edit_friendly_name(pack['entity_id'], friendly_name)
-                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name}
+                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name, 'device_type': platform}
                 data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
                 notity_client_device_into_net(data_obj)
             elif pack_list[5] == '0x2':
@@ -836,8 +852,8 @@ def setup(hass, config):
                 if mgr.add_plugin(pack):
                     discovery.load_platform(hass, component, data['platform'], {'name': data['devices'][mac]['name'], 'mac': mac})
                 name_mgr.edit_friendly_name(pack['entity_id'], friendly_name)
-                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name}
-                data_obj = {'status':'OK', 'data': data, 'type': 'add_device', 'device_type': platform}
+                data = {'entity_id': pack['entity_id'], 'friendly_name': friendly_name, 'device_type': platform}
+                data_obj = {'status':'OK', 'data': data, 'type': 'add_device'}
                 notity_client_device_into_net(data_obj)
 
             # reload core config and friendlyname is work 
