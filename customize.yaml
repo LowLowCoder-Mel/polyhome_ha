@@ -96,3 +96,11 @@ automation.1526614559:
   friendly_name: ww
 automation.1526631572:
   friendly_name: tt
+light.lnlightb453:
+  friendly_name: 一路零火灯
+light.lnlight17251:
+  friendly_name: 三路零火灯1
+light.lnlight17252:
+  friendly_name: 三路零火灯2
+light.lnlight17253:
+  friendly_name: 三路零火灯3

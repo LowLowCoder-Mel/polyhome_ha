@@ -6,3 +6,11 @@
     46#b1:
       name: sensor46b1
   platform: polythl
+- devices:
+    46#b1:
+      name: sensor46b1
+  platform: polythl
+- devices:
+    46#b1:
+      name: sensor46b1
+  platform: polythl
