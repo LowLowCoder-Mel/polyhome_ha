@@ -103,6 +103,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
                         temp = "{:0>8}".format(temp)
                         temp_f = struct.unpack('f', bytes.fromhex(temp))[0]
                         dev.set_value(round(temp_f, 1))
+                        hass.services.call('gateway', 'publish_heart_beat', {'entity_id': dev.entity_id, 'state': round(temp_f, 1)})
                     if dev.sensor_type == 'humidity':
                         temp = ''
                         for data in pack_list[13:17]:
@@ -110,12 +111,14 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
                         temp = "{:0>8}".format(temp)
                         temp_f = struct.unpack('f', bytes.fromhex(temp))[0]
                         dev.set_value(round(temp_f))
+                        hass.services.call('gateway', 'publish_heart_beat', {'entity_id': dev.entity_id, 'state': round(temp_f)})
                     if dev.sensor_type == 'light':
                         temp = ''
                         for data in pack_list[17:19]:
                             temp += data.replace('0x', '')
                         temp_f = int(temp, 16)
                         dev.set_value(round(temp_f))
+                        hass.services.call('gateway', 'publish_heart_beat', {'entity_id': dev.entity_id, 'state': round(temp_f)})
         if pack_list[0] == '0xa0' and pack_list[5] == '0x53' and pack_list[8] == '0x77':
             # device status
             mac_l, mac_h = pack_list[2].replace('0x', ''), pack_list[3].replace('0x', '')

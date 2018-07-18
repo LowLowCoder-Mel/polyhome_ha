@@ -1,0 +1,15 @@
+# Describes the format for available zha services
+
+permit:
+  description: Allow nodes to join the ZigBee network.
+  fields:
+    duration:
+      description: Time to permit joins, in seconds
+      example: 60
+
+remove:
+  description: remove node(s) from the ZigBee network.
+  fields:
+    ieee:
+      description: ieee or parts of it
+      example: 00:15:8d:00:01:f4:66:c1
