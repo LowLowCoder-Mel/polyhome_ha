@@ -1,1 +1,4 @@
-[]
+- devices:
+    13#a9:
+      name: lock13a9
+  platform: polyholishi

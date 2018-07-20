@@ -6,3 +6,11 @@
     4#a0:
       name: panel44a0
   platform: polypanel4
+- devices:
+    22#58:
+      name: io2258
+  platform: polyiosensor
+- devices:
+    51#7a:
+      name: smokesensor517a
+  platform: polysmokesensor

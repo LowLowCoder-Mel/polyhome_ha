@@ -9,6 +9,7 @@ from homeassistant.components.lock import LockDevice
 from homeassistant.const import (STATE_LOCKED, STATE_UNLOCKED)
 import polyhome.util.algorithm as checkcrc
 
+from polyhome import JSONEncoder
 _LOGGER = logging.getLogger(__name__)
 
 DOMAIN = 'lock'
@@ -54,8 +55,20 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
                 return
             dev.set_available(True)
             if pack_list[9] == '0x2' and pack_list[-2] == '0xff':
-                key_mgr = LockKeyManager(hass, config)
-                key_mgr.edit_friendly_name(dev.mac, pack_list[10:13])     
+                if pack_list[13] == '0x8':
+                    dev.trespass()
+                elif pack_list[13] == '0x14':
+                    dev.prylock()
+                elif pack_list[13] == '0xdd':
+                    dev.paircode()
+                    key_mgr = LockKeyManager(hass, config)
+                    key_mgr.edit_friendly_name(dev.mac, pack_list[10:13])
+                elif pack_list[13] == '0x47':
+                    dev.set_state(True)
+                elif pack_list[13] == '0x7':
+                    dev.set_state(False)
+                elif pack_list[13] == '0x87' or pack_list[13] == '0xc7':
+                    dev.lowpower()
         if pack_list[0] == '0xa0' and pack_list[5] == '0x0' and pack_list[8] == '0xcc':
             """heart_beat"""
             mac_l, mac_h = pack_list[2].replace('0x', ''), pack_list[3].replace('0x', '')
@@ -143,6 +156,10 @@ class HoLiShiLock(LockDevice):
     def set_available(self, state):
         self._available = state
 
+    def set_state(self, state):
+        self._state = state
+        self.schedule_update_ha_state()
+
     def lock(self, **kwargs):
         """Lock the device."""
         self._state = STATE_LOCKED
@@ -176,6 +193,54 @@ class HoLiShiLock(LockDevice):
         CMD_LOCK_OPEN[12] = int(lock_key[2].replace('0x', ''), 16)
         CMD_LOCK_OPEN[14] = self.sumup(CMD_LOCK_OPEN[10:14])
         self._hass.services.call(POLY_ZIGBEE_DOMAIN, POLY_ZIGBEE_SERVICE, {'data': CMD_LOCK_OPEN})
+
+    def trespass(self):
+        for state in self._hass.states.async_all():
+            state_dict = state.as_dict()
+            if state_dict['entity_id'] == 'lock.' + self.name:
+                new_state = state
+                msg = json.dumps(new_state, sort_keys=True, cls=JSONEncoder)
+                json_msg = json.loads(msg)
+                json_msg['attributes']['type'] = 'trespass'
+                pub_obj = {'status':'OK', 'data': json_msg, 'type': 'state_change'}
+                data_str = {'data': json.dumps(pub_obj)}
+                self._hass.services.call('polyremotemqtt', 'mqtt_pub_state_change', data_str)
+
+    def paircode(self):
+        for state in self._hass.states.async_all():
+            state_dict = state.as_dict()
+            if state_dict['entity_id'] == 'lock.' + self.name:
+                new_state = state
+                msg = json.dumps(new_state, sort_keys=True, cls=JSONEncoder)
+                json_msg = json.loads(msg)
+                json_msg['attributes']['type'] = 'paircode'
+                pub_obj = {'status':'OK', 'data': json_msg, 'type': 'state_change'}
+                data_str = {'data': json.dumps(pub_obj)}
+                self._hass.services.call('polyremotemqtt', 'mqtt_pub_state_change', data_str)
+
+    def prylock(self):
+        for state in self._hass.states.async_all():
+            state_dict = state.as_dict()
+            if state_dict['entity_id'] == 'lock.' + self.name:
+                new_state = state
+                msg = json.dumps(new_state, sort_keys=True, cls=JSONEncoder)
+                json_msg = json.loads(msg)
+                json_msg['attributes']['type'] = 'prylock'
+                pub_obj = {'status':'OK', 'data': json_msg, 'type': 'state_change'}
+                data_str = {'data': json.dumps(pub_obj)}
+                self._hass.services.call('polyremotemqtt', 'mqtt_pub_state_change', data_str)
+
+    def lowpower(self):
+        for state in self._hass.states.async_all():
+            state_dict = state.as_dict()
+            if state_dict['entity_id'] == 'lock.' + self.name:
+                new_state = state
+                msg = json.dumps(new_state, sort_keys=True, cls=JSONEncoder)
+                json_msg = json.loads(msg)
+                json_msg['attributes']['type'] = 'lowpower'
+                pub_obj = {'status':'OK', 'data': json_msg, 'type': 'state_change'}
+                data_str = {'data': json.dumps(pub_obj)}
+                self._hass.services.call('polyremotemqtt', 'mqtt_pub_state_change', data_str)
 
     def heart_beat(self):
         self._heart_timestamp = time.time()

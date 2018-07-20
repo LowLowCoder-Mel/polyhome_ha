@@ -13,6 +13,12 @@ EVENT_ZIGBEE_RECV = 'zigbee_data_event'
 
 _LOGGER = logging.getLogger(__name__)
 
+SENSOR_TYPES = {
+    "icon": {
+        True: "bell-ring",
+        False: "smoking-off"
+    }
+}
 
 def setup_platform(hass, config, add_devices, discovery_info=None):
     """Setup the PolyhomeSmokeSenser platform."""
@@ -35,9 +41,17 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
         mac_str = mac_l + '#' + mac_h
         dev = next((dev for dev in smoke if dev.mac == mac_str), None)
         if dev is not None:
-            if pack_list[0] == '0xa0' and pack_list[9] == '0x1':
+            if pack_list[0] == '0xa0' and pack_list[9] == '0xd':
                 # 0xa0 0xc4 0x11 0x5 0x5 0x40 0x11 0x5 0x79 0xd 0x55
-                hass.bus.fire('binarysensor.' + dev._name + '_' + 'triggered')
+                dev.set_available(False)
+                dev.set_state(False)
+            if pack_list[0] == '0xa0' and pack_list[9] == '0x1':
+                # 0xa0 0xc6 0x11 0x5 0x5 0x40 0x11 0x5 0x79 0x1 0x5b
+                dev.set_available(True)
+                dev.set_state(True)
+            if pack_list[0] == '0xa0' and pack_list[8] == '0xcc':
+                dev.set_available(True)
+                dev.heart_beat()
 
     hass.bus.listen('zigbee_data_event', event_zigbee_recv_handler)
 
@@ -52,6 +66,7 @@ class PolySensorBinarySensor(BinarySensorDevice):
         self._mac = device['mac']
         self._name = device['name']
         self._config = dev_conf
+        self._state = False
 
     @property
     def name(self):
@@ -64,12 +79,18 @@ class PolySensorBinarySensor(BinarySensorDevice):
     @property
     def icon(self):
         """Get an icon to display."""
-        return "mdi:smoking-off"
+        state_icon = SENSOR_TYPES["icon"][self._state]
+        return "mdi:{}".format(state_icon)
 
     @property
     def available(self):
         """Return True if entity is available."""
         return True
+
+    @property
+    def is_on(self):
+        """Return True if the binary sensor is on."""
+        return self._state
 
     @property
     def device_state_attributes(self):
@@ -81,4 +102,8 @@ class PolySensorBinarySensor(BinarySensorDevice):
 
     def set_available(self, available):
         self._available = available
+        self.schedule_update_ha_state()
+
+    def set_state(self, state):
+        self._state = state
         self.schedule_update_ha_state()
