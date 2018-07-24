@@ -64,9 +64,9 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
                     key_mgr = LockKeyManager(hass, config)
                     key_mgr.edit_friendly_name(dev.mac, pack_list[10:13])
                 elif pack_list[13] == '0x47':
-                    dev.set_state(True)
+                    dev.set_state(STATE_LOCKED)
                 elif pack_list[13] == '0x7':
-                    dev.set_state(False)
+                    dev.set_state(STATE_LOCKED)
                 elif pack_list[13] == '0x87' or pack_list[13] == '0xc7':
                     dev.lowpower()
         if pack_list[0] == '0xa0' and pack_list[5] == '0x0' and pack_list[8] == '0xcc':
@@ -103,7 +103,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
 
 
 class HoLiShiLock(LockDevice):
-    """HoLiShi lock Class."""
+    """HoLiShi lock Device."""
 
     def __init__(self, hass, config, device, dev_conf):
         """Initialize an PolyLock."""
@@ -151,7 +151,7 @@ class HoLiShiLock(LockDevice):
 
         Implemented by platform classes.
         """
-        return {'platform': 'polyholishi'}
+        return {'platform': 'polyholishi', 'type': ''}
 
     def set_available(self, state):
         self._available = state
